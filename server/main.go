@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -18,21 +19,15 @@ const grpcPort = "localhost:6000"
 func main() {
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
-		log.Fatalf("failed to start gRPC server - err=%s", err)
+		log.Fatalf("failed to create listener - err=%s", err)
 	}
 
-	s := echo.Service{}
-
-	creds, err := credentials.NewServerTLSFromFile("certs/server-cert.pem", "certs/server-key.pem")
+	grpcServer, err := buildServer()
 	if err != nil {
-		log.Fatalf("unable to load TLS key - err=%s", err)
+		log.Fatalf("failed to build gRPC server - err=%s", err)
 	}
 
-	opts := []grpc.ServerOption{grpc.Creds(creds), unaryMiddleware()}
-
-	grpcServer := grpc.NewServer(opts...)
-	echo.RegisterEchoServiceServer(grpcServer, &s)
-	reflection.Register(grpcServer)
+	registerEchoService(grpcServer)
 
 	log.Printf("starting gRPC server - port=%s", grpcPort)
 	if err := grpcServer.Serve(lis); err != nil {
@@ -40,9 +35,32 @@ func main() {
 	}
 }
 
+func buildServer() (*grpc.Server, error) {
+	creds, err := credentials.NewServerTLSFromFile("certs/server-cert.pem", "certs/server-key.pem")
+	if err != nil {
+		return nil, fmt.Errorf("unable to load TLS key - err=%s", err)
+	}
+
+	opts := []grpc.ServerOption{grpc.Creds(creds), unaryMiddleware()}
+
+	grpcServer := grpc.NewServer(opts...)
+	reflection.Register(grpcServer)
+
+	return grpcServer, nil
+}
+
+// Builds considated grpc.ServerOption from list of injected middleware. The
+// core gRPC lib allows only a single unary interceptor. The grpc_middleware
+// package used here allows middleware chaining. Interceptors are invoked
+// in the order specified from top to bottom.
 func unaryMiddleware() grpc.ServerOption {
 	return grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		middleware.AuthInterceptor,
 		middleware.LoggingInterceptor,
 	))
+}
+
+func registerEchoService(server *grpc.Server) {
+	echoSvc := echo.Service{}
+	echo.RegisterEchoServiceServer(server, &echoSvc)
 }

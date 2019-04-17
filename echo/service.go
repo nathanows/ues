@@ -1,8 +1,8 @@
 package echo
 
-import context "context"
+import "context"
 
-// Service implements gRPC echo.
+// Service implements EchoServiceServer
 type Service struct {
 }
 

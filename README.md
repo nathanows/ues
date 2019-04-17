@@ -1,8 +1,11 @@
 # UES (Ultimate Echo Server)
 
-**UES** is a sample gRPC server implementation that implements a single Echo RPC. The Echo service implements the proto contract seen below. The server itself uses TLS to secure communication and implements middleware for request lifecycle logging and Token Header authentication.
+**UES** is a sample gRPC server implementation that implements a single Echo RPC. The Echo service implements the proto contract seen below. The server itself uses TLS to secure communication and implements middleware for request lifecycle logging and Token Header authentication (preshared secret).
 
 This repo should be seen as exemplary not productionalized. See _Implementation Details_ below for details on design decisions.
+
+**Authentication**
+Service authentication enforces passing a valid auth token on all client RPC calls, specified via an "authorization" metadata key on requests. For both client and server in this implementation this is set with a `TOKEN` env var.
 
 ---
 
@@ -81,7 +84,7 @@ message EchoResponse {
 /echo               # core gRPC service implmentation
     echo.pb.go      # protoc compiled, language specific proto contracts
     echo.proto      # base proto contract definition
-    server.go       # implmentation of echo.EchoService RPC handlers
+    service.go       # implmentation of echo.EchoService RPC handlers
 /server             # base gRPC server wireup
 ```
 
