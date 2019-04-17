@@ -1,0 +1,22 @@
+FROM golang:1.12
+
+ENV PROTOC_GEN_GO_VERSION v1.3.1
+ENV PROTOC_VERSION 3.7.1
+
+RUN apt-get update && apt-get install -y --no-install-recommends unzip
+
+# Install protoc
+RUN curl -L -o protoc-$PROTOC_VERSION.zip https://github.com/protocolbuffers/protobuf/releases/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
+RUN unzip protoc-$PROTOC_VERSION
+
+# Install protoc-gen-go extension
+RUN go get -u google.golang.org/grpc
+RUN go get -d -u github.com/golang/protobuf/protoc-gen-go
+RUN git -C "$(go env GOPATH)"/src/github.com/golang/protobuf checkout $PROTOC_GEN_GO_VERSION
+RUN go install github.com/golang/protobuf/protoc-gen-go
+
+# Compile protos
+RUN mkdir -p /proto/gen
+WORKDIR /proto
+COPY proto/. .
+RUN protoc --go_out=plugins=grpc:./gen *.proto
