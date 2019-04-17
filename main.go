@@ -17,7 +17,7 @@ const grpcPort = ":6000"
 func main() {
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
-		log.Fatalf("failed to start gRPC server: %s", err)
+		log.Fatalf("failed to start gRPC server - err=%s", err)
 	}
 
 	s := echo.EchoService{}
@@ -26,9 +26,9 @@ func main() {
 	echo.RegisterEchoServiceServer(grpcServer, &s)
 	reflection.Register(grpcServer)
 
-	log.Printf("starting gRPC server on %s", grpcPort)
+	log.Printf("starting gRPC server - port=%s", grpcPort)
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to start gRPC server: %s", err)
+		log.Fatalf("failed to start gRPC server - err=%s", err)
 	}
 }
 
@@ -41,6 +41,6 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 
 	h, err := handler(ctx, req)
 
-	log.Printf("Request - Method:%s\tDuration:%s\tError:%v\n", info.FullMethod, time.Since(start), err)
+	log.Printf("request processed - method=%s duration=%s error=%v\n", info.FullMethod, time.Since(start), err)
 	return h, err
 }
