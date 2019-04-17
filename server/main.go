@@ -1,19 +1,15 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
-	"os"
-	"time"
+
+	"github.com/nathanows/ues/echo"
+	"github.com/nathanows/ues/internal/pkg/middleware"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/nathanows/ues/echo"
-
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -46,33 +42,7 @@ func main() {
 
 func unaryMiddleware() grpc.ServerOption {
 	return grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		authInterceptor,
-		loggingInterceptor,
+		middleware.AuthInterceptor,
+		middleware.LoggingInterceptor,
 	))
-}
-
-func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	start := time.Now()
-
-	h, err := handler(ctx, req)
-
-	log.Printf("request processed - method=%s duration=%s error=%v\n", info.FullMethod, time.Since(start), err)
-	return h, err
-}
-
-func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	meta, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, grpc.Errorf(codes.Unauthenticated, "missing metadata context")
-	}
-
-	if len(meta["authorization"]) != 1 {
-		return nil, grpc.Errorf(codes.Unauthenticated, "invalid token")
-	}
-
-	if meta["authorization"][0] != os.Getenv("TOKEN") {
-		return nil, grpc.Errorf(codes.Unauthenticated, "invalid token")
-	}
-
-	return handler(ctx, req)
 }
