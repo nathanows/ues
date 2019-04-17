@@ -1,6 +1,7 @@
 ECHO_PB_PATH := "echo/echo.pb.go"
 SERVER_BIN_PATH := "bin/server"
 CLIENT_BIN_PATH := "bin/client"
+AUTH_TOKEN := "super-secret"
 
 .PHONY: all build-client build-server clean proto server help
 
@@ -22,6 +23,10 @@ gen-certs: ## generate self-signed SSL cert
 	@echo "+ $@"
 	@openssl req -x509 -newkey rsa:4096 -keyout certs/server-key.pem -out certs/server-cert.pem -days 365 -nodes -subj '/CN=localhost'
 
+client-request: ## make sample client request
+	@echo "+ $@"
+	@TOKEN=$(AUTH_TOKEN) go run client/main.go test again "something else" 123
+
 proto: ## compile .proto files
 	@echo "+ $@"
 	@docker build -t protogen -f Dockerfile.protogen .
@@ -31,7 +36,7 @@ proto: ## compile .proto files
 
 server: gen-certs build-server ## run local server
 	@echo "+ $@"
-	@bin/server
+	@TOKEN=$(AUTH_TOKEN) bin/server
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

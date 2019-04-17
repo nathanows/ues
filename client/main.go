@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 )
 
 const grpcAddr = "localhost:6000"
@@ -48,7 +49,10 @@ func makeRequest(msg string, client echo.EchoServiceClient, ch chan<- string) {
 	start := time.Now()
 	req := echo.EchoRequest{Message: msg}
 	log.Printf("Request: %s", req.Message)
-	resp, err := client.Echo(context.Background(), &req)
+
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", os.Getenv("TOKEN"))
+
+	resp, err := client.Echo(ctx, &req)
 	if err != nil {
 		log.Fatalf("error when calling Echo: %s", err)
 	}
