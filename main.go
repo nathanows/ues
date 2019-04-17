@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
 
-	echopb "github.com/nathanows/ues/proto"
+	"github.com/nathanows/ues/echo"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -19,23 +18,14 @@ func main() {
 		log.Fatalf("failed to start gRPC server: %s", err)
 	}
 
-	s := EchoService{}
+	s := echo.EchoService{}
 
 	grpcServer := grpc.NewServer()
-	echopb.RegisterEchoServiceServer(grpcServer, &s)
+	echo.RegisterEchoServiceServer(grpcServer, &s)
 	reflection.Register(grpcServer)
 
 	log.Printf("starting gRPC server on %s", grpcPort)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to start gRPC server: %s", err)
 	}
-}
-
-// EchoService implements gRPC echo.
-type EchoService struct {
-}
-
-// Echo responds with a message body matching that of the request message body
-func (s *EchoService) Echo(ctx context.Context, req *echopb.EchoRequest) (*echopb.EchoResponse, error) {
-	return &echopb.EchoResponse{Message: req.Message}, nil
 }
