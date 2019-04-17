@@ -9,10 +9,11 @@ import (
 	"github.com/nathanows/ues/echo"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
-const grpcPort = ":6000"
+const grpcPort = "localhost:6000"
 
 func main() {
 	lis, err := net.Listen("tcp", grpcPort)
@@ -22,7 +23,14 @@ func main() {
 
 	s := echo.EchoService{}
 
-	grpcServer := grpc.NewServer(withLogUnaryInterceptor())
+	creds, err := credentials.NewServerTLSFromFile("certs/server-cert.pem", "certs/server-key.pem")
+	if err != nil {
+		log.Fatalf("unable to load TLS key - err=%s", err)
+	}
+
+	opts := []grpc.ServerOption{grpc.Creds(creds), withLogUnaryInterceptor()}
+
+	grpcServer := grpc.NewServer(opts...)
 	echo.RegisterEchoServiceServer(grpcServer, &s)
 	reflection.Register(grpcServer)
 

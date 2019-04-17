@@ -2,23 +2,25 @@ ECHO_PB_PATH := "echo/echo.pb.go"
 SERVER_BIN_PATH := "bin/server"
 CLIENT_BIN_PATH := "bin/client"
 
-.PHONY: all proto
+.PHONY: all build-client build-server clean proto server help
 
 all: build-server build-client
 
 build-client: proto ## build client binary
 	@echo "+ $@"
 	@go build -i -o $(CLIENT_BIN_PATH) github.com/nathanows/ues/client
-	@echo "    $(CLIENT_BIN_PATH)"
 
 build-server: proto ## build server binary
 	@echo "+ $@"
 	@go build -i -o $(SERVER_BIN_PATH) github.com/nathanows/ues
-	@echo "    $(SERVER_BIN_PATH)"
 
 clean: ## remove all build artifacts
 	@echo "+ $@"
 	@rm -f $(ECHO_PB_PATH) $(SERVER_BIN_PATH) $(CLIENT_BIN_PATH)
+
+gen-certs: ## generate self-signed SSL cert
+	@echo "+ $@"
+	@openssl req -x509 -newkey rsa:4096 -keyout certs/server-key.pem -out certs/server-cert.pem -days 365 -nodes -subj '/CN=localhost'
 
 proto: ## compile .proto files
 	@echo "+ $@"
@@ -27,9 +29,8 @@ proto: ## compile .proto files
 	@docker cp protogen:/proto/gen/echo.pb.go $(ECHO_PB_PATH)
 	@docker rm protogen
 
-server: build-server ## run local server
+server: gen-certs build-server ## run local server
 	@echo "+ $@"
-	@clear
 	@bin/server
 
 help:

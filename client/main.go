@@ -10,6 +10,7 @@ import (
 	"github.com/nathanows/ues/echo"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const grpcAddr = "localhost:6000"
@@ -17,7 +18,12 @@ const grpcAddr = "localhost:6000"
 func main() {
 	start := time.Now()
 
-	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure())
+	creds, err := credentials.NewClientTLSFromFile("certs/server-cert.pem", "")
+	if err != nil {
+		log.Fatalf("cert load error: %s", err)
+	}
+
+	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("unable to connect: %s", err)
 	}
