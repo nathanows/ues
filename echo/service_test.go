@@ -8,7 +8,7 @@ import (
 )
 
 func TestEcho(t *testing.T) {
-	s := &echo.EchoService{}
+	s := &echo.Service{}
 
 	tests := []struct {
 		req  string

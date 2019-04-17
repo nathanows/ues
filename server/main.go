@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/nathanows/ues/echo"
 
 	"google.golang.org/grpc"
@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("failed to start gRPC server - err=%s", err)
 	}
 
-	s := echo.EchoService{}
+	s := echo.Service{}
 
 	creds, err := credentials.NewServerTLSFromFile("certs/server-cert.pem", "certs/server-key.pem")
 	if err != nil {

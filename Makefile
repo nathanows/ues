@@ -13,7 +13,7 @@ build-client: proto ## build client binary
 
 build-server: proto ## build server binary
 	@echo "+ $@"
-	@go build -i -o $(SERVER_BIN_PATH) github.com/nathanows/ues
+	@go build -i -o $(SERVER_BIN_PATH) github.com/nathanows/ues/server
 
 clean: ## remove all build artifacts
 	@echo "+ $@"
