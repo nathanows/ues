@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
+	"time"
 
 	"github.com/nathanows/ues/echo"
 
@@ -20,7 +22,7 @@ func main() {
 
 	s := echo.EchoService{}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(withLogUnaryInterceptor())
 	echo.RegisterEchoServiceServer(grpcServer, &s)
 	reflection.Register(grpcServer)
 
@@ -28,4 +30,17 @@ func main() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to start gRPC server: %s", err)
 	}
+}
+
+func withLogUnaryInterceptor() grpc.ServerOption {
+	return grpc.UnaryInterceptor(loggingInterceptor)
+}
+
+func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	start := time.Now()
+
+	h, err := handler(ctx, req)
+
+	log.Printf("Request - Method:%s\tDuration:%s\tError:%v\n", info.FullMethod, time.Since(start), err)
+	return h, err
 }
