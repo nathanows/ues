@@ -18,5 +18,5 @@ RUN go install github.com/golang/protobuf/protoc-gen-go
 # Compile protos
 RUN mkdir -p /proto/gen
 WORKDIR /proto
-COPY proto/. .
+COPY echo/echo.proto .
 RUN protoc --go_out=plugins=grpc:./gen *.proto
