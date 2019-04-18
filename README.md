@@ -13,42 +13,49 @@ Service authentication enforces passing a valid auth token on all client RPC cal
 
 ### Local
 
-#### Sample Requests
-To see a running demo of the functionality of this application run the following:
+See the following functionality overview for running the application locally.
 
-```
-$ make server           # generates local certs, compiles protos, builds binary, runs server
-$ make client-request   # makes a set of concurrent sample requests to the local server
-```
+_Note: the commands below requires a working Go environment and `openssl` (for generating local TLS certs)._
 
-The above commands require a working Go environment (for building binary), Docker (used for protobuf compilation), and `openssl` (for generating local TLS certs). To run in a fully containerized environment use the following:
+#### Run Server
 
-```
-$ make serverd           # builds and starts server container
-$ make client-requestd   # builds and runs sample requests from client container
+```bash
+make server       # generates local certs, compiles protos, builds binary, runs server
+
+make serverd      # run server in Docker
 ```
 
-#### Tests
+_`make server` requires a working Go environment (for building binary) and `openssl` (for generating local TLS certs)._
+
+#### Make Requests (sample client)
+
+```bash
+make client-request   # makes a set of concurrent sample requests to the local server
+```
+
+#### Make Requests (gRPCurl)
+
+`grpcurl` is a command-line tool that lets you interact with gRPC servers (`curl` for gRPC)
+
+```bash
+# list registered endpoints
+```
+
+#### Run Tests
 
 Run the application test suite with:
 
-```
+```bash
 make test
 ```
 
-Or, to run the tests in a containerized environment use:
+#### Compile Protos
 
+If changes are made to the service's proto contract, proto files must be recompiled using the following command:
+
+```bash
+make protogen
 ```
-make testd
-```
-
-### Minikube
-
-**TODO**
-
-### Deployed
-
-**TODO**
 
 ---
 
@@ -109,22 +116,8 @@ Later on, the EchoService has turned out to be kind of a flop, but the Transform
 
 External dependencies are managed using [Go Modules](https://github.com/golang/go/wiki/Modules), but are generally avoided where possible in this example (isolated to working with gRPC).
 
-```
+```txt
 github.com/golang/protobuf
 github.com/grpc-ecosystem/go-grpc-middleware
 google.golang.org/grpc
 ```
-
----
-
-## Kubernetes
-
-**TODO**
-
-### Cilium
-
-**TODO**
-
-#### EchoService Network Security Policy
-
-**TODO**
