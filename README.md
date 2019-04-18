@@ -27,18 +27,42 @@ make serverd      # run server in Docker
 
 _`make server` requires a working Go environment (for building binary) and `openssl` (for generating local TLS certs)._
 
-#### Make Requests (sample client)
+#### Make Requests (pre-configured client)
+
+To send a small concurrent set of preconfigured messages to the service you can use the following. For a more dynamic experience, build and use the client binary directly or use `grpcurl`
 
 ```bash
 make client-request   # makes a set of concurrent sample requests to the local server
 ```
 
+#### Make Requests (pre-configured client)
+
+```bash
+make build-client
+TOKEN=super-secret SERVER_ADDR=localhost:6000 bin/client "message 1" "message 2"
+```
+
 #### Make Requests (gRPCurl)
 
-`grpcurl` is a command-line tool that lets you interact with gRPC servers (`curl` for gRPC)
+`grpcurl` is a command-line tool that lets you interact with gRPC servers (think `curl` for gRPC). See [installation instructions](https://github.com/fullstorydev/grpcurl#installation) on the projects' GitHub page.
+
+_**Note**: `--insecure` flag is needed due to usage of self-signed certs locally_
 
 ```bash
 # list registered endpoints
+grpcurl --insecure localhost:6000 list
+
+# describe service
+grpcurl --insecure localhost:6000 describe echo.EchoService.Echo
+
+# describe EchoRequest
+grpcurl --insecure localhost:6000 describe echo.EchoRequest
+
+# send Echo request
+grpcurl --insecure -d '{"message": "check this out"}' \
+    -H 'authorization: super-secret' \
+    localhost:6000 \
+    echo.EchoService/Echo
 ```
 
 #### Run Tests
@@ -51,10 +75,16 @@ make test
 
 #### Compile Protos
 
-If changes are made to the service's proto contract, proto files must be recompiled using the following command:
+If changes are made to the service's proto contract, proto files must be recompiled using the following command. `protoc` is run from a Docker build image so no additional installs are required.
 
 ```bash
 make protogen
+```
+
+#### Build Docker Image
+
+```bash
+make container
 ```
 
 ---

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"github.com/nathanows/ues/echo"
 	"github.com/nathanows/ues/internal/pkg/middleware"
@@ -14,10 +15,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const grpcPort = "localhost:6000"
-
 func main() {
-	lis, err := net.Listen("tcp", grpcPort)
+	addr := os.Getenv("SERVER_ADDR")
+	fmt.Println(addr)
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to create listener - err=%s", err)
 	}
@@ -29,7 +30,7 @@ func main() {
 
 	registerEchoService(grpcServer)
 
-	log.Printf("starting gRPC server - port=%s", grpcPort)
+	log.Printf("starting gRPC server - addr=%s", addr)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to start gRPC server - err=%s", err)
 	}

@@ -14,8 +14,6 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-const grpcAddr = "localhost:6000"
-
 func main() {
 	start := time.Now()
 
@@ -24,7 +22,9 @@ func main() {
 		log.Fatalf("cert load error: %s", err)
 	}
 
-	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(creds))
+	serverAddr := os.Getenv("SERVER_ADDR")
+	fmt.Println(serverAddr)
+	conn, err := grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("unable to connect: %s", err)
 	}

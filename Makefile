@@ -2,16 +2,15 @@ ECHO_PB_PATH := "echo/echo.pb.go"
 SERVER_BIN_PATH := "bin/server"
 CLIENT_BIN_PATH := "bin/client"
 AUTH_TOKEN := "super-secret"
+SERVER_ADDR := "localhost:6000"
 
-.PHONY: all build-client build-server clean proto server help
+.PHONY: build-client build-server clean container gen-certs protogen server test help
 
-all: build-server build-client
-
-build-client: proto ## build client binary
+build-client: ## build client binary
 	@echo "+ $@"
 	@go build -i -o $(CLIENT_BIN_PATH) github.com/nathanows/ues/client
 
-build-server: proto ## build server binary
+build-server: ## build server binary
 	@echo "+ $@"
 	@go build -i -o $(SERVER_BIN_PATH) github.com/nathanows/ues/server
 
@@ -19,15 +18,19 @@ clean: ## remove all build artifacts
 	@echo "+ $@"
 	@rm -f $(ECHO_PB_PATH) $(SERVER_BIN_PATH) $(CLIENT_BIN_PATH)
 
+client-request: ## make sample client request
+	@echo "+ $@"
+	@TOKEN=$(AUTH_TOKEN) SERVER_ADDR=$(SERVER_ADDR) bin/client test again "something else" 123
+
+container: ## build Docker image
+	@echo "+ $@"
+	@docker build -t ues:latest .
+
 gen-certs: ## generate self-signed SSL cert
 	@echo "+ $@"
 	@openssl req -x509 -newkey rsa:4096 -keyout certs/server-key.pem -out certs/server-cert.pem -days 365 -nodes -subj '/CN=localhost'
 
-client-request: ## make sample client request
-	@echo "+ $@"
-	@TOKEN=$(AUTH_TOKEN) go run client/main.go test again "something else" 123
-
-proto: ## compile .proto files
+protogen: ## compile .proto files
 	@echo "+ $@"
 	@docker build -t protogen -f Dockerfile.protogen .
 	@docker run --name protogen protogen
@@ -36,7 +39,7 @@ proto: ## compile .proto files
 
 server: gen-certs build-server ## run local server
 	@echo "+ $@"
-	@TOKEN=$(AUTH_TOKEN) bin/server
+	@TOKEN=$(AUTH_TOKEN) SERVER_ADDR=$(SERVER_ADDR) bin/server
 
 test: ## run full test suite
 	@echo "+ $@"
