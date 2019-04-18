@@ -21,8 +21,6 @@ _Note: the commands below require a working Go environment and `openssl` (for ge
 
 ```bash
 make server       # generates local certs, compiles protos, builds binary, runs server
-
-make serverd      # run server in Docker
 ```
 
 #### Make Requests (pre-configured client)
