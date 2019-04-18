@@ -25,8 +25,6 @@ make server       # generates local certs, compiles protos, builds binary, runs 
 make serverd      # run server in Docker
 ```
 
-_`make server` requires a working Go environment (for building binary) and `openssl` (for generating local TLS certs)._
-
 #### Make Requests (pre-configured client)
 
 To send a small concurrent set of preconfigured messages to the service you can use the following. For a more dynamic experience, build and use the client binary directly or use `grpcurl`
@@ -140,7 +138,6 @@ Later on, the EchoService has turned out to be kind of a flop, but the Transform
 `/internal` (details [here](https://docs.google.com/document/d/1e8kOo3r51b2BWtTs_1uADIA5djfXhPT36s6eHVRIvaU/edit)) is the default directory to add most new packages to until the functionality is vetted and the API contract finalized.
 
 `/pkg` contains isolated helper packages used across services. In this example that is just the `middleware` package, but things like DB driver wrappers, context parsers, etc. are other examples. These can generally can be good candidates for abstraction.
-
 
 ### Dependencies
 
