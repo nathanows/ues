@@ -15,7 +15,7 @@ Service authentication enforces passing a valid auth token on all client RPC cal
 
 See the following functionality overview for running the application locally.
 
-_Note: the commands below requires a working Go environment and `openssl` (for generating local TLS certs)._
+_Note: the commands below require a working Go environment and `openssl` (for generating local TLS certs)._
 
 #### Run Server
 
