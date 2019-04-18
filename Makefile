@@ -4,21 +4,23 @@ CLIENT_BIN_PATH := "bin/client"
 AUTH_TOKEN := "super-secret"
 SERVER_ADDR := "localhost:6000"
 
-.PHONY: build-client build-server clean container gen-certs protogen server test help
+.PHONY: build-client build-server clean container gen-certs init-deps protogen server test help
 
 build-client: ## build client binary
 	@echo "+ $@"
+	@mkdir -p bin
 	@go build -i -o $(CLIENT_BIN_PATH) github.com/nathanows/ues/client
 
 build-server: ## build server binary
 	@echo "+ $@"
+	@mkdir -p bin
 	@go build -i -o $(SERVER_BIN_PATH) github.com/nathanows/ues/server
 
 clean: ## remove all build artifacts
 	@echo "+ $@"
 	@rm -f $(ECHO_PB_PATH) $(SERVER_BIN_PATH) $(CLIENT_BIN_PATH)
 
-client-request: ## make sample client request
+client-request: build-client ## make sample client request
 	@echo "+ $@"
 	@TOKEN=$(AUTH_TOKEN) SERVER_ADDR=$(SERVER_ADDR) bin/client test again "something else" 123
 
@@ -28,7 +30,12 @@ container: ## build Docker image
 
 gen-certs: ## generate self-signed SSL cert
 	@echo "+ $@"
+	@mkdir -p certs
 	@openssl req -x509 -newkey rsa:4096 -keyout certs/server-key.pem -out certs/server-cert.pem -days 365 -nodes -subj '/CN=localhost'
+
+init-deps: ## get deps
+	@echo "+ $@"
+	@go get -u ./...
 
 protogen: ## compile .proto files
 	@echo "+ $@"
