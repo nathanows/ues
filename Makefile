@@ -6,12 +6,12 @@ SERVER_ADDR := "localhost:6000"
 
 .PHONY: build-client build-server clean container gen-certs init-deps protogen server test help
 
-build-client: ## build client binary
+build-client: init-deps ## build client binary
 	@echo "+ $@"
 	@mkdir -p bin
 	@go build -i -o $(CLIENT_BIN_PATH) github.com/nathanows/ues/client
 
-build-server: ## build server binary
+build-server: init-deps ## build server binary
 	@echo "+ $@"
 	@mkdir -p bin
 	@go build -i -o $(SERVER_BIN_PATH) github.com/nathanows/ues/server
@@ -48,7 +48,7 @@ server: gen-certs build-server ## run local server
 	@echo "+ $@"
 	@TOKEN=$(AUTH_TOKEN) SERVER_ADDR=$(SERVER_ADDR) bin/server
 
-test: ## run full test suite
+test: init-deps ## run full test suite
 	@echo "+ $@"
 	@TOKEN=$(AUTH_TOKEN) go test ./...
 
